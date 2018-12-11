@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/edite_num"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入进程数量：" />
+
+    <EditText
+        android:id="@+id/edite_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="http://192.168.1.6:8080/cosbrowser-setup-1.1.6.exe"
+        android:hint="请输入下载路径" />
+
+    <Button
+        android:id="@+id/btn_down"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="download"
+        android:text="下载" />
+</LinearLayout>
