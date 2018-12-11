@@ -6,6 +6,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.lidroid.xutils.HttpUtils;
+import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.ResponseInfo;
+import com.lidroid.xutils.http.callback.RequestCallBack;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,11 +45,36 @@ public class MainActivity extends AppCompatActivity {
         et_num = findViewById(R.id.edite_num);
         et_path = findViewById(R.id.edite_path);
         ll_container = findViewById(R.id.ll_container);
+
+    }
+  public  void download2(){
+        path=et_path.getText().toString().trim();
+        HttpUtils utils = new HttpUtils();
+
+     utils.download(path, "/data/data/com.wdn.multidownloader/cache/"+getDownLoadFileName(path), true, new RequestCallBack<File>() {
+     @Override
+     public void onSuccess(ResponseInfo<File> responseInfo) {
+         Toast.makeText(MainActivity.this, "下载成功", Toast.LENGTH_SHORT).show();
+     }
+
+     @Override
+     public void onFailure(HttpException e, String s) {
+         Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
+
+     }
+
+         @Override
+         public void onLoading(long total, long current, boolean isUploading) {
+         //作业添加一个pb
+             System.out.println(current);
+         }
+     });
     }
 public void download(View view){
-        path=et_path.getText().toString().trim();
+   /*     path=et_path.getText().toString().trim();
         String str_num=et_num.getText().toString().trim();
         totalThreadCount=Integer.parseInt(str_num);
+        //修复网络中断，会删除pb的情况
         ll_container.removeAllViews();
     pbs = new ArrayList<>();
         for (int i=0;i<totalThreadCount;i++){
@@ -62,12 +93,15 @@ public void download(View view){
              if (code==200){
                  int length=urlConnection.getContentLength();
                  System.out.println("file length:"+length);
-                 RandomAccessFile raf = new RandomAccessFile(getDownLoadFileName(path), "rw");
+                 System.out.println(getCacheDir()+"/"+getDownLoadFileName(path));
+                 RandomAccessFile raf = new RandomAccessFile("/data/data/com.wdn.multidownloader/cache/"+getDownLoadFileName(path), "rw");
                  //创建一个空的文件并且设置它的文件长度等于服务器上的文件长度吗
+
                  raf.setLength(length);
                  raf.close();
                  int blockSize=length/totalThreadCount;
                  System.out.println("every block size:"+blockSize);
+
                  runningThreadCount=totalThreadCount;
                  for (int threadId=0;threadId<totalThreadCount;threadId++){
                      int startPosition=threadId*blockSize;
@@ -83,7 +117,28 @@ public void download(View view){
              e.printStackTrace();
          }
      }
- }.start();
+ }.start();*/
+    path=et_path.getText().toString().trim();
+    HttpUtils utils = new HttpUtils();
+
+    utils.download(path, "/data/data/com.wdn.multidownloader/cache/"+getDownLoadFileName(path), true, new RequestCallBack<File>() {
+        @Override
+        public void onSuccess(ResponseInfo<File> responseInfo) {
+            Toast.makeText(MainActivity.this, "下载成功", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onFailure(HttpException e, String s) {
+            Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        public void onLoading(long total, long current, boolean isUploading) {
+            //作业添加一个pb
+            System.out.println(current);
+        }
+    });
 }
     private static String getDownLoadFileName(String path) {
         return path.substring(path.lastIndexOf("/")+1);
@@ -122,7 +177,7 @@ public void download(View view){
             System.out.println("threadId"+threadId+"begin working");
             //lest thread download it's self range data
             try {
-                File file = new File(totalThreadCount + getDownLoadFileName(path) + threadId + ".txt");
+                File file = new File("/data/data/com.wdn.multidownloader/cache/"+totalThreadCount + getDownLoadFileName(path) + threadId + ".txt");
                 if (file.exists()&&file.length()>0){
                     FileInputStream fileInputStream=new FileInputStream(file);
                     BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(fileInputStream));
@@ -143,7 +198,7 @@ public void download(View view){
                 int code=conn.getResponseCode();
                 if (code==206){
                     InputStream is=conn.getInputStream();
-                    RandomAccessFile rw = new RandomAccessFile(getDownLoadFileName(path), "rw");
+                    RandomAccessFile rw = new RandomAccessFile("/data/data/com.wdn.multidownloader/cache/"+getDownLoadFileName(path), "rw");
                     rw.seek(startPosition);
                     byte[] bytes = new byte[1024];
                     int len=-1;
@@ -153,7 +208,7 @@ public void download(View view){
                         rw.write(bytes,0,len);
                         //记录当前流的文件位置去下载
                         total+=len;
-                        RandomAccessFile inforaf = new RandomAccessFile(totalThreadCount + getDownLoadFileName(path) + threadId + ".txt","rwd");
+                        RandomAccessFile inforaf = new RandomAccessFile("/data/data/com.wdn.multidownloader/cache/"+totalThreadCount + getDownLoadFileName(path) + threadId + ".txt","rwd");
                         //save position of current thread
                         inforaf.write(String.valueOf(startPosition+total).getBytes());
                         inforaf.close();
@@ -173,7 +228,7 @@ public void download(View view){
                     if (runningThreadCount<=0){
                         System.out.println("multi thread download complete.");
                         for (int i=0;i<totalThreadCount;i++){
-                            File file = new File(totalThreadCount + getDownLoadFileName(path) + i + ".txt");
+                            File file = new File("/data/data/com.wdn.multidownloader/cache/"+totalThreadCount + getDownLoadFileName(path) + i + ".txt");
                             /*  System.out.println(file.delete());*/
                         }
                     }
